@@ -1,0 +1,963 @@
+<!--
+
+TODO:
+ - add "ghost" cards to match preview to get them to resize properly
+ - figure out how to scale cards as screen size changes?
+ - work on mobile-friendly layout
+
+
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Daily SET</title>
+  <style>
+    :root {
+      --yellow: #FFFF88;
+      --red: #c00000;
+      --green: #008000;
+      --purple: #800080;
+
+      /* 2.25 x 3.5 is standard card size... probably */
+      /* pixel size is x40 these dimensions */
+      --card-width: 140px;
+      --card-height: 90px;
+      --small-scale: 0.33;
+
+      font-family: 'Courier New', Courier, monospace;
+      font-weight: bolder;
+    }
+
+    @media (max-width: 550px) {
+      :root {
+        --card-width: 105px;
+        --card-height: 67.5px;
+      }
+    }
+
+    @media (max-width: 440px) {
+      :root {
+        --card-width: 70px;
+        --card-height: 45px;
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 20px;
+    }
+
+    h3 {
+      margin: 0px 0px 10px;
+      font-weight: bolder;
+      font-size: 20px;
+    }
+
+    p {
+      margin: 0px;
+    }
+
+    p+p {
+      margin: 10px 0px 0px;
+    }
+
+    #content {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+    }
+
+    @media (max-width: 768px) {
+      #content {
+        display: flex;
+        flex-direction: column;
+      }
+
+      #info-panel {
+        order: 2;
+      }
+
+      #game-panel {
+        order: 1;
+      }
+
+      #right-panel {
+        order: 3;
+      }
+    }
+
+    #title {
+      font-size: xx-large;
+      width: 100%;
+      text-align: center;
+    }
+
+    #info-panel details {
+      margin: 20px 10px;
+      width: auto;
+      height: min-content;
+      border: 2px solid;
+      border-color: black;
+      border-radius: 8px;
+      padding: 10px;
+      hyphens: auto;
+    }
+
+    #info-panel details:first-of-type {
+      margin: 10px;
+    }
+
+    #info-panel summary {
+      list-style: none;
+      cursor: pointer;
+      font-weight: bolder;
+      font-size: 20px;
+      display: block;
+    }
+
+    #info-panel summary::-webkit-details-marker {
+      display: none;
+    }
+
+    #info-panel span {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    #info-panel summary span::before {
+      content: "►";
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      margin-right: 0.5rem;
+      transition: transform 500ms ease;
+    }
+
+    #info-panel summary.opened span::before {
+      transform: rotate(90deg);
+    }
+
+    #info-panel .details-content {
+      overflow: hidden;
+      transition: height 500ms ease, opacity 500ms ease;
+      height: 0px;
+      opacity: 0;
+    }
+
+    #info-panel .details-content .inner {
+      padding-top: 10px;
+    }
+
+    #game-panel {
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    #board {
+      margin: 10px;
+      width: min-content;
+      height: min-content;
+      border: 2px solid;
+      border-color: black;
+      border-radius: 8px;
+      display: grid;
+      grid-template-columns: 33.3% 33.3% 33.3%;
+      padding: 10px;
+    }
+
+    .card-wrapper.ghost {
+      opacity: 0;
+    }
+
+    .card-wrapper {
+      margin: 10px;
+    }
+
+    .card-wrapper.preview {
+      width: calc(var(--card-width) * var(--small-scale));
+      height: calc(var(--card-height) * var(--small-scale));
+      margin: 2.5px;
+    }
+
+    .card {
+      padding: calc(var(--card-width) * 0.05);
+      width: var(--card-width);
+      height: var(--card-height);
+      border: 3px solid;
+      border-color: black;
+      border-radius: calc(var(--card-width) * 0.1);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: white;
+    }
+
+    @media (max-width: 550px) {
+      .card {
+        border: 2px solid;
+      }
+    }
+
+    .card.preview {
+      scale: var(--small-scale);
+      transform-origin: top left;
+    }
+
+    .card:hover:not(.preview) {
+      box-shadow: 0px 0px 10px -2px black;
+    }
+
+    .card.selected {
+      background-color: var(--yellow);
+    }
+
+    .card.red {
+      --fill-color: var(--red);
+      --stroke-color: var(--red);
+    }
+
+    .card.green {
+      --fill-color: var(--green);
+      --stroke-color: var(--green);
+    }
+
+    .card.purple {
+      --fill-color: var(--purple);
+      --stroke-color: var(--purple);
+    }
+
+    .shape {
+      margin: 2.212px;
+      height: 100%;
+    }
+
+    svg.shape .fill {
+      fill: var(--fill-color);
+    }
+
+    svg.shape .stroke {
+      fill: none;
+      stroke: var(--fill-color);
+      stroke-width: 18px;
+    }
+
+    #match-container {
+      margin: 10px;
+      padding: 10px;
+      width: min-content;
+      height: min-content;
+      border: 2px solid;
+      border-color: black;
+      border-radius: 8px;
+    }
+
+    #match-header {
+      text-align: center;
+      font-size: x-large;
+      width: 100%;
+    }
+
+    .matches {
+      display: flex;
+    }
+
+    .match-preview {
+      /* width: 61.333px; */
+      /* height: 109px; */
+      margin: 10px;
+      padding: 2.5px;
+      border: 2px solid;
+      border-color: black;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .match-preview:not(.example):not(:has(.ghost)):has(*) {
+      background-color: var(--yellow);
+    }
+
+    @media (max-width: 550px) {
+      .match-preview {
+        margin: 7px;
+      }
+    }
+
+    @media (max-width: 440px) {
+      .match-preview {
+        margin: 4px;
+      }
+    }
+
+    #timer {
+      font-size: x-large;
+      width: 100%;
+      text-align: center;
+    }
+
+    #toast-container {
+      height: 118px;
+    }
+
+    .toast {
+      padding: 10px;
+      margin: 10px;
+      width: 160px;
+      height: 24px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: white;
+      box-shadow: 0px 0px 10px -2px black;
+
+      /* Transition settings */
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 320ms cubic-bezier(.42, 0, .58, 1), transform 320ms cubic-bezier(.42, 0, .58, 1);
+    }
+
+    .toast.success {
+      background-color: var(--green);
+    }
+
+    .toast.info {
+      background-color: var(--purple);
+    }
+
+    .toast.fail {
+      background-color: var(--red);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .toast.hide {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+
+    .toast .message {
+      width: 100%;
+      text-align: center;
+    }
+
+    @keyframes blink-animation {
+      50% {
+        visibility: hidden;
+      }
+    }
+
+    .blink {
+      animation: blink-animation 1s steps(1, start) 0.5s infinite;
+      animation-delay: 0.5s;
+    }
+  </style>
+  <script>
+    /*
+     * RNG Code courtesy of ChatGPT
+     */
+
+    // Create a seed from today’s date
+    function getTodaySeed() {
+      const formatter = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'America/New_York',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      });
+      return formatter.format(new Date());
+    }
+
+    // Convert the seed string to a number
+    function hashStringToInt(seed) {
+      let hash = 0;
+      for (let i = 0; i < seed.length; i++) {
+        hash = (hash << 5) - hash + seed.charCodeAt(i);
+        hash |= 0; // Convert to 32-bit integer
+      }
+      return hash;
+    }
+
+    // Seeded PRNG (Mulberry32)
+    function mulberry32(seed) {
+      return function () {
+        let t = seed += 0x6D2B79F5;
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+
+    // Seeded Fisher–Yates shuffle
+    function shuffleWithSeed(array, random) {
+      const result = [...array]; // don’t mutate original
+      for (let i = result.length - 1; i > 0; i--) {
+        const j = Math.floor(random() * (i + 1));
+        [result[i], result[j]] = [result[j], result[i]];
+      }
+      return result;
+    }
+
+    const Color = Object.freeze({
+      RED: 'red',
+      GREEN: 'green',
+      PURPLE: 'purple'
+    });
+
+    const Count = Object.freeze({
+      ONE: 1,
+      TWO: 2,
+      THREE: 3
+    });
+
+    const Shape = Object.freeze({
+      OVAL: 'oval',
+      DIAMOND: 'diamond',
+      SQUIGGLE: 'squiggle'
+    });
+
+    const Fill = Object.freeze({
+      SOLID: 'solid',
+      STRIPED: 'stripes',
+      EMPTY: 'empty'
+    });
+
+    class Card {
+
+      static ALL_CARDS = []
+
+      static {
+        let count = 0
+        for (let color in Color) {
+          for (let count in Count) {
+            for (let shape in Shape) {
+              for (let fill in Fill) {
+                console.log(color);
+                this.ALL_CARDS.push(new Card(Color[color], Count[count], Shape[shape], Fill[fill]));
+              }
+            }
+          }
+        }
+      }
+
+      constructor(color, count, shape, fill) {
+        this.color = color;
+        this.count = count;
+        this.shape = shape;
+        this.fill = fill;
+      }
+
+      static isMatch(card1, card2, card3) {
+        return ((card1.color == card2.color && card2.color == card3.color)
+          || (card1.color != card2.color && card2.color != card3.color && card3.color != card1.color))
+          && ((card1.count == card2.count && card2.count == card3.count)
+            || (card1.count != card2.count && card2.count != card3.count && card3.count != card1.count))
+          && ((card1.shape == card2.shape && card2.shape == card3.shape)
+            || (card1.shape != card2.shape && card2.shape != card3.shape && card3.shape != card1.shape))
+          && ((card1.fill == card2.fill && card2.fill == card3.fill)
+            || (card1.fill != card2.fill && card2.fill != card3.fill && card3.fill != card1.fill));
+      }
+    }
+
+    class Board {
+      deck = [];
+      constructor(matches = 6) {
+        console.debug(`Building board with ${matches} matches...`)
+        const start = performance.now()
+        const seedString = getTodaySeed();
+        const seedNumber = hashStringToInt(seedString);
+        const random = mulberry32(seedNumber);
+        // change inital random number generation value
+        // for (let i = 0; i++ < 6; random());
+
+        let count = 0;
+        while (count != matches) {
+          this.deck = shuffleWithSeed(Card.ALL_CARDS, random);
+          console.debug("SHUFFLE")
+          for (let idx = 0; idx < this.deck.length - 12; idx += 12) {
+            let cards = this.deck.slice(idx, idx + 12);
+            count = 0;
+            for (let i = 0; i < 12 && count <= matches; i++) {
+              for (let j = i + 1; j < 12 && count <= matches; j++) {
+                for (let k = j + 1; k < 12 && count <= matches; k++) {
+                  if (Card.isMatch(cards[i], cards[j], cards[k])) {
+                    count++;
+                  }
+                }
+              }
+            }
+            if (count == matches) {
+              console.debug("MATCH")
+              this.deck = cards;
+              break;
+            }
+            if (count > matches) {
+              console.debug("OVER")
+            } else {
+              console.debug("UNDER")
+            }
+          }
+        }
+
+        const end = performance.now();
+        console.debug(`Completed in ${(end - start).toFixed(2)} milliseconds`);
+      }
+    }
+
+    let b = new Board();
+
+    let selected = [];
+    let selectedCards = [];
+    let matches = [];
+    function onClick(card, e) {
+      let idx = b.deck.indexOf(card);
+      const cardHolder = document.querySelectorAll("#board .card")[idx];
+      if (selected.indexOf(card) == -1) {
+        if (selected.length >= 3) {
+          return;
+        }
+        cardHolder.classList.add("selected");
+        selected.push(card);
+        if (selected.length == 3) {
+          checkMatch();
+        }
+      } else {
+        cardHolder.classList.remove("selected");
+        selected.splice(selected.indexOf(card), 1);
+      }
+    }
+
+    function checkMatch() {
+      if (Card.isMatch(...selected)) {
+        let newMatch = true;
+        for (let match of matches) {
+          if (match.includes(selected[0])
+            && match.includes(selected[1])
+            && match.includes(selected[2])) {
+            newMatch = false;
+            break;
+          }
+        }
+        if (newMatch) {
+          showToast("Found a set!", "success");
+          let idx = matches.length;
+          matches.push([...selected]);
+
+          const matchPreview = document.querySelectorAll(".match-preview:not(.example)")[idx];
+          console.log(matchPreview);
+          matchPreview.innerHTML = "";
+          const frag = document.createDocumentFragment();
+
+          for (const card of selected) {
+            frag.append(makeCard(card, true));
+          }
+
+          matchPreview.appendChild(frag);
+
+          const matchHeader = document.getElementById("match-header");
+          if (matches.length == 1) {
+            matchHeader.innerText = `1 set found:`
+          } else {
+            matchHeader.innerText = `${matches.length} Sets found:`
+          }
+
+          if (matches.length == 6) {
+            // game is done!
+            clearInterval(timerId);
+            const timerEl = document.getElementById("timer");
+            timerEl.classList.add("blink");
+            let time = Date.now() - startTime;
+            timerEl.textContent = new Date(time).toISOString().slice(14, -1);
+          }
+
+        } else {
+          showToast("Already found!", "info");
+        }
+
+      } else {
+        showToast("Not a set!", "fail");
+      }
+      for (const card of [...selected]) {
+        onClick(card, null);
+      }
+    }
+
+    function showToast(message, style) {
+      const container = document.getElementById("toast-container");
+      const template = document.getElementById("toast-template");
+      const clone = template.content.firstElementChild.cloneNode(true);
+      clone.classList.add(style);
+      const msgEl = clone.querySelector(".message");
+      msgEl.innerText = message;
+      container.appendChild(clone);
+      requestAnimationFrame(() => clone.classList.add("show"));
+      setTimeout(() => {
+        // clone.classList.remove("show")
+        clone.classList.add("hide");
+        clone.addEventListener('transitionend', clone.remove, { once: true });
+      }, 5000);
+    }
+
+    function makeCard(card, tiny = false) {
+      const cardWrapper = document.createElement("div");
+      cardWrapper.className = "card-wrapper";
+
+      const cardEl = document.createElement("div");
+      cardEl.className = `card ${card.color}`.trim();
+      cardWrapper.appendChild(cardEl);
+
+      if (tiny) {
+        cardEl.classList.add("preview");
+        cardWrapper.classList.add("preview");
+      }
+
+      const svg = document.createElementNS(
+        'http://www.w3.org/2000/svg',
+        'svg'
+      );
+      svg.classList.add("shape");
+      /*
+      if (tiny) {
+        svg.setAttribute("width", "10");
+        svg.setAttribute("height", "20");
+      } else {
+        svg.setAttribute("width", "30");
+        svg.setAttribute("height", "60");
+      }
+      */
+      svg.setAttribute("viewBox", "0 0 200 400");
+
+      const stroke = document.createElementNS(
+        'http://www.w3.org/2000/svg',
+        "use"
+      );
+      stroke.classList.add("stroke");
+      stroke.setAttribute("href", `#${card.shape}`);
+      if (card.fill != Fill.EMPTY) {
+        const fill = document.createElementNS(
+          'http://www.w3.org/2000/svg',
+          "use"
+        );
+        fill.classList.add("fill");
+        fill.setAttribute("href", `#${card.shape}`);
+        if (card.fill == Fill.STRIPED) {
+          fill.setAttribute("mask", "url(#mask-stripes)");
+        }
+        svg.append(fill);
+      }
+      svg.append(stroke);
+
+      for (let i = 1; i < card.count; i++) {
+        cardEl.append(svg.cloneNode(true));
+      }
+      cardEl.append(svg);
+
+      if (!tiny) {
+        cardEl.addEventListener("click", e => onClick(card, e));
+      }
+
+      return cardWrapper;
+    }
+
+    let timerId = null;
+    let startTime = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      // set up details panes
+      document.querySelectorAll("details").forEach(details => {
+        const summary = details.querySelector("summary");
+        const content = details.querySelector(".details-content");
+
+        summary.addEventListener("click", e => {
+          e.preventDefault();
+          if (summary.classList.contains("opened")) {
+            // close it! ... animate first, then close details
+            content.style.height = content.scrollHeight + "px";
+            content.style.opacity = "1";
+            content.offsetHeight;
+
+            content.style.height = "0px";
+            content.style.opacity = "0";
+            summary.classList.remove("opened");
+
+            content.addEventListener(
+              "transitionend",
+              () => {
+                if (!summary.classList.contains("opened")) {
+                  details.open = false;
+                }
+              },
+              { once: true }
+            );
+          } else {
+            // open it! ... open details first, then animate
+            details.open = true;
+            summary.classList.add("opened");
+
+            requestAnimationFrame(() => {
+              content.style.height = content.scrollHeight + "px";
+              content.style.opacity = "1";
+
+              content.addEventListener(
+                "transitionend",
+                () => {
+                  if (summary.classList.contains("opened")) {
+                    content.style.height = "auto";
+                  }
+                },
+                { once: true }
+              );
+            });
+          }
+        });
+      });
+
+      // open first detail panel
+      const details = document.querySelector("details");
+      const summary = details.querySelector("summary");
+      const content = details.querySelector(".details-content");
+
+      details.open = true;
+      summary.classList.add("opened");
+      content.style.height = "auto";
+      content.style.opacity = "1";
+      content.style.transition = "none";
+
+      // re-enable transitions on next frame
+      requestAnimationFrame(() => {
+        content.style.transition = "";
+      });
+
+      // set up example sets
+      const examples = document.querySelectorAll(".match-preview.example");
+      const cards = [
+        [
+          [new Card(Color.PURPLE, 2, Shape.SQUIGGLE, Fill.STRIPED), false],
+          [new Card(Color.PURPLE, 2, Shape.DIAMOND, Fill.STRIPED), false],
+          [new Card(Color.PURPLE, 2, Shape.OVAL, Fill.STRIPED), false]
+        ],
+        [
+          [new Card(Color.RED, 1, Shape.OVAL, Fill.EMPTY), false],
+          [new Card(Color.PURPLE, 2, Shape.OVAL, Fill.SOLID), false],
+          [new Card(Color.GREEN, 3, Shape.OVAL, Fill.STRIPED), false]
+        ],
+        [
+          [new Card(Color.GREEN, 3, Shape.DIAMOND, Fill.SOLID), false],
+          [new Card(Color.RED, 1, Shape.OVAL, Fill.STRIPED), false],
+          [new Card(Color.PURPLE, 2, Shape.SQUIGGLE, Fill.EMPTY), false]
+        ],
+        [
+          [new Card(Color.RED, 1, Shape.DIAMOND, Fill.EMPTY), false],
+          [new Card(Color.RED, 3, Shape.DIAMOND, Fill.SOLID), true],
+          [new Card(Color.RED, 3, Shape.DIAMOND, Fill.STRIPED), true]
+        ],
+        [
+          [new Card(Color.RED, 2, Shape.SQUIGGLE, Fill.STRIPED), true],
+          [new Card(Color.PURPLE, 2, Shape.DIAMOND, Fill.STRIPED), true],
+          [new Card(Color.PURPLE, 2, Shape.OVAL, Fill.SOLID), false]
+        ],
+        [
+          [new Card(Color.GREEN, 3, Shape.SQUIGGLE, Fill.SOLID), true],
+          [new Card(Color.RED, 1, Shape.OVAL, Fill.STRIPED), false],
+          [new Card(Color.PURPLE, 2, Shape.SQUIGGLE, Fill.EMPTY), true]
+        ]
+      ];
+
+      for (let i = 0; i < cards.length && i < examples.length; i++) {
+        const frag = document.createDocumentFragment();
+        for (const card of cards[i]) {
+          let cardEl = makeCard(card[0], true)
+          if (card[1]) {
+            cardEl.classList.add("selected");
+          }
+          frag.append(cardEl);
+        }
+        examples[i].innerHTML = "";
+        examples[i].appendChild(frag);
+      }
+
+      // set up ghost cards
+      const matchPreviews = document.querySelectorAll(".match-preview:not(.example)");
+      const fakeCard = new Card(null, 3, Shape.OVAL, Fill.SOLID);
+      for (const preview of matchPreviews) {
+        preview.innerHTML = "";
+        const frag = document.createDocumentFragment();
+
+        for (let i = 0; i < 3; i++) {
+          const cardEl = makeCard(fakeCard, true);
+          cardEl.classList.add("ghost");
+          frag.append(cardEl);
+        }
+
+        preview.appendChild(frag);
+      }
+
+      // show cards
+      const container = document.getElementById("board");
+      const frag = document.createDocumentFragment();
+
+      for (const card of b.deck) {
+        let cardEl = makeCard(card);
+        frag.append(cardEl);
+      }
+
+      container.innerHTML = "";
+      container.appendChild(frag);
+
+      // timer V1: 100ms interval
+      const timerEl = document.getElementById("timer");
+      startTime = Date.now();
+      timerId = setInterval(() => {
+        let time = Date.now() - startTime;
+        timerEl.textContent = new Date(time).toISOString().slice(14, -5);
+      }, 1000);
+
+      // timer V2: requestAnimationFrame()
+      /*
+      const timerEl = document.getElementById("timer");
+      function updateTimer(now) {
+        const time = now - startTime;
+        timerEl.textContent = new Date(time).toISOString().slice(14, -5);
+        requestAnimationFrame(updateTimer);
+      }
+      requestAnimationFrame(updateTimer);
+      */
+    });
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body>
+  <template id="toast-template">
+    <div class="toast">
+      <div class="message"></div>
+    </div>
+  </template>
+  <svg width="200" height="400" style="position:fixed;z-index:-1">
+    <defs>
+      <path id="squiggle"
+        d="m67.892902,12.746785c43.231313,-6.717223 107.352741,6.609823 121.028973,58.746408c13.676233,52.136585 -44.848649,161.467192 -45.07116,204.650732c4.566246,56.959708 83.805481,87.929227 22.329944,105.806022c-61.475536,17.876795 -126.122496,-1.855045 -143.73294,-41.933823c-17.610444,-40.07878 49.274638,-120.109409 46.14822,-188.091997c-3.126418,-67.982588 -21.873669,-70.257464 -49.613153,-80.177084c-27.739485,-9.919618 5.678801,-52.283035 48.910115,-59.000258z">
+      </path>
+      <path id="oval"
+        d="m11.49999,95.866646c0,-44.557076 37.442923,-81.999998 82.000002,-81.999998l12.000015,0c44.557076,0 81.999992,37.442923 81.999992,81.999998l0,206.133354c0,44.557098 -37.442917,82 -81.999992,82l-12.000015,0c-44.557079,0 -82.000002,-37.442902 -82.000002,-82l0,-206.133354z">
+      </path>
+      <path id="diamond" d="m100 10-90 190 90 190 90-190-90-190z"></path>
+      <path id="hourglass"
+        d="m118.4386 201.1739c0-19.9228 17.9239-37.4523 26.8821-47.8051 23.5179-24.6961 40.3179-68.5227 43.6821-119.5128.5578-10.3522-3.9211-19.9228-9.5239-19.9228H19.3203c-5.6028 0-10.0817 9.5703-9.5239 19.9228 3.3634 50.9901 20.1634 94.8155 43.6821 120.3075 8.9578 9.5586 26.8821 27.0888 26.8821 47.0104 0 19.1172-17.9239 36.6486-26.8821 47.0104-23.5179 25.4897-40.3179 69.3144-43.6821 120.3075-.5578 10.3522 3.9211 19.9228 9.5239 19.9228h159.6c6.1606 0 10.6394-9.5586 9.5239-19.9228-3.3634-50.9901-20.1634-94.8155-43.6821-120.3075-8.9659-9.5586-26.3235-27.0888-26.3235-47.0104z">
+      </path>
+      <pattern id="pattern-stripes" width="2" height="20" patternUnits="userSpaceOnUse">
+        <rect width="2" height="8" fill="#fff"></rect>
+      </pattern>
+      <mask id="mask-stripes">
+        <rect x="0" y="0" width="200" height="400" fill="url(#pattern-stripes)"></rect>
+      </mask>
+      <pattern id="pattern-checkers" width="100" height="200" patternUnits="userSpaceOnUse">
+        <rect x="0" y="0" width="50" height="100" fill="#fff"></rect>
+        <rect x="50" y="100" width="50" height="100" fill="#fff"></rect>
+      </pattern>
+      <mask id="mask-checkers">
+        <rect x="0" y="0" width="200" height="400" fill="url(#pattern-checkers)"></rect>
+      </mask>
+    </defs>
+  </svg>
+  <div id="title">Daily SET</div>
+  <div id="content">
+    <div id="info-panel">
+      <details>
+        <summary><span>About</span></summary>
+        <div class="details-content">
+          <div class="inner">
+            <p>
+              Daily SET is a game based on <a href="https://www.playmonster.com/product/set/">Play&shy;Monster's SET
+                card
+                game</a>.
+              There used to be an offi&shy;cial Daily SET game online, but the web&shy;site was taken down in 2025.
+              This is a recre&shy;ation of that ori&shy;ginal Daily SET game.
+            </p>
+          </div>
+        </div>
+      </details>
+      <details>
+        <summary><span>How to Play</span></summary>
+        <div class="details-content">
+          <div class="inner">
+            <p>
+              Each card has 4 properties: color, count, shape, and fill.
+              A set can be made out of any three cards where each property is either the same across all three cards or
+              different across all three cards.
+              The goal is to find all 6 sets that can be created with these 12 cards.
+              Below are a few examples of valid and invalid sets.
+            </p>
+          </div>
+        </div>
+      </details>
+      <details>
+        <summary><span>Valid Sets</span></summary>
+        <div class="details-content">
+          <div class="inner">
+            <div id="valid-sets" class="matches">
+              <div class="match-preview example"></div>
+              <div class="match-preview example"></div>
+              <div class="match-preview example"></div>
+            </div>
+          </div>
+        </div>
+      </details>
+      <details>
+        <summary><span>Invalid Sets</span></summary>
+        <div class="details-content">
+          <div class="inner">
+            <div id="invalid-sets" class="matches">
+              <div class="match-preview example"></div>
+              <div class="match-preview example"></div>
+              <div class="match-preview example"></div>
+            </div>
+            <p>
+              The first set is invalid because two of the three cards have 3 shapes.
+              Either all three of them need to have three shapes, or only one of them can.
+            </p>
+            <p>
+              The second set is invalid because there are two striped cards and one solid.
+              Also, two of the cards are purple and one is red.
+            </p>
+            <p>
+              The third set is invalid because two cards have squiggles and one has ovals.
+            </p>
+          </div>
+        </div>
+      </details>
+    </div>
+    <div id="game-panel">
+      <div id="board"></div>
+      <div id="match-container">
+        <div id="match-header">0 sets found:</div>
+        <div class="matches">
+          <div class="match-preview"></div>
+          <div class="match-preview"></div>
+          <div class="match-preview"></div>
+          <div class="match-preview"></div>
+          <div class="match-preview"></div>
+          <div class="match-preview"></div>
+        </div>
+        <div id="timer">00:00</div>
+      </div>
+      <div id="toast-container"></div>
+    </div>
+    <div id="right-panel">
+      Test
+    </div>
+  </div>
+</body>
+
+</html>
