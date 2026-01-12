@@ -1,0 +1,35 @@
+name: Deploy SET Game
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout set-game repo
+        uses: actions/checkout@v4
+
+      - name: Checkout root Pages repo
+        uses: actions/checkout@v4
+        with:
+          repository: LMaster765/LMaster765.github.io
+          token: ${{ secrets.PAGES_DEPLOY_TOKEN }}
+          path: pages
+
+      - name: Deploy to /set-game
+        run: |
+          rm -rf pages/set-game
+          mkdir -p pages/set-game
+          cp set.html pages/set-game/
+
+      - name: Commit and push
+        run: |
+          cd pages
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add set-game
+          git commit -m "Deploy set-game"
+          git push
