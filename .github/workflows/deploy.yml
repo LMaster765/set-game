@@ -23,7 +23,7 @@ jobs:
         run: |
           rm -rf pages/set-game
           mkdir -p pages/set-game
-          cp set.html pages/set-game/
+          cp -r site/* pages/set-game/
 
       - name: Commit and push
         run: |
