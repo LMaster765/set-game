@@ -183,13 +183,8 @@ p+p {
 }
 
 .card-wrapper {
-  margin: 10px;
-  container: card;
-  container-type: inline-size;
-}
-
-.card-wrapper.preview {
-  margin: 2.5px;
+  margin: 10%;
+  container: card / inline-size;
 }
 
 .card {
@@ -250,6 +245,12 @@ svg.shape .stroke {
   border-radius: 8px;
 }
 
+@media (max-width: 768px) {
+  #match-container {
+    padding: 5px;
+  }
+}
+
 #match-header {
   text-align: center;
   font-size: x-large;
@@ -259,6 +260,7 @@ svg.shape .stroke {
 .matches {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
+  container: match-preview / inline-size;
 }
 
 @media (max-width: 768px) {
@@ -268,10 +270,8 @@ svg.shape .stroke {
 }
 
 .match-preview {
-  margin: 10%;
-  padding: 2.5px;
-  border: 2px solid;
-  border-color: black;
+  margin: 5%;
+  border: 2px solid black;
   border-radius: 8px;
   display: flex;
   flex-direction: column;
@@ -282,15 +282,9 @@ svg.shape .stroke {
   background-color: var(--yellow);
 }
 
-@media (max-width: 550px) {
+@media (max-width: 768px) {
   .match-preview {
-    margin: 7px;
-  }
-}
-
-@media (max-width: 440px) {
-  .match-preview {
-    margin: 4px;
+    border-radius: 6px;
   }
 }
 
