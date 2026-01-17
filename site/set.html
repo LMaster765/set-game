@@ -91,7 +91,6 @@ TODO:
           for (let count in Count) {
             for (let shape in Shape) {
               for (let fill in Fill) {
-                console.log(color);
                 this.ALL_CARDS.push(new Card(Color[color], Count[count], Shape[shape], Fill[fill]));
               }
             }
@@ -349,6 +348,13 @@ TODO:
               { once: true }
             );
           } else {
+            // first, close any opened details
+            document.querySelectorAll("details").forEach(dt => {
+              if (dt.hasAttribute("open")) {
+                dt.querySelector("summary").click();
+              }
+            });
+
             // open it! ... open details first, then animate
             details.open = true;
             summary.classList.add("opened");
@@ -509,92 +515,94 @@ TODO:
       </mask>
     </defs>
   </svg>
-  <div id="title">Daily SET</div>
-  <div id="content">
-    <div id="info-panel">
-      <details>
-        <summary><span>About</span></summary>
-        <div class="details-content">
-          <div class="inner">
-            <p>
-              Daily SET is a game based on <a href="https://www.playmonster.com/product/set/">Play&shy;Monster's SET
-                card
-                game</a>.
-              There used to be an offi&shy;cial Daily SET game online, but the web&shy;site was taken down in 2025.
-              This is a recre&shy;ation of that ori&shy;ginal Daily SET game.
-            </p>
-          </div>
-        </div>
-      </details>
-      <details>
-        <summary><span>How to Play</span></summary>
-        <div class="details-content">
-          <div class="inner">
-            <p>
-              Each card has 4 properties: color, count, shape, and fill.
-              A set can be made out of any three cards where each property is either the same across all three cards or
-              different across all three cards.
-              The goal is to find all 6 sets that can be created with these 12 cards.
-              Below are a few examples of valid and invalid sets.
-            </p>
-          </div>
-        </div>
-      </details>
-      <details>
-        <summary><span>Valid Sets</span></summary>
-        <div class="details-content">
-          <div class="inner">
-            <div id="valid-sets" class="matches">
-              <div class="match-preview example"></div>
-              <div class="match-preview example"></div>
-              <div class="match-preview example"></div>
+  <div id="main-container">
+    <div id="title">Daily SET</div>
+    <div id="content">
+      <div id="info-panel">
+        <details>
+          <summary><span>About</span></summary>
+          <div class="details-content">
+            <div class="inner">
+              <p>
+                Daily SET is a game based on <a href="https://www.playmonster.com/product/set/">Play&shy;Monster's SET
+                  card
+                  game</a>.
+                There used to be an offi&shy;cial Daily SET game online, but the web&shy;site was taken down in 2025.
+                This is a recre&shy;ation of that ori&shy;ginal Daily SET game.
+              </p>
             </div>
           </div>
-        </div>
-      </details>
-      <details>
-        <summary><span>Invalid Sets</span></summary>
-        <div class="details-content">
-          <div class="inner">
-            <div id="invalid-sets" class="matches">
-              <div class="match-preview example"></div>
-              <div class="match-preview example"></div>
-              <div class="match-preview example"></div>
+        </details>
+        <details>
+          <summary><span>How to Play</span></summary>
+          <div class="details-content">
+            <div class="inner">
+              <p>
+                Each card has 4 properties: color, count, shape, and fill.
+                A set can be made out of any three cards where each property is either the same across all three cards
+                or
+                different across all three cards.
+                The goal is to find all 6 sets that can be created with these 12 cards.
+                Below are a few examples of valid and invalid sets.
+              </p>
             </div>
-            <p>
-              The first set is invalid because two of the three cards have 3 shapes.
-              Either all three of them need to have three shapes, or only one of them can.
-            </p>
-            <p>
-              The second set is invalid because there are two striped cards and one solid.
-              Also, two of the cards are purple and one is red.
-            </p>
-            <p>
-              The third set is invalid because two cards have squiggles and one has ovals.
-            </p>
           </div>
-        </div>
-      </details>
-    </div>
-    <div id="game-panel">
-      <div id="board"></div>
-      <div id="match-container">
-        <div id="match-header">0 sets found:</div>
-        <div class="matches">
-          <div class="match-preview"></div>
-          <div class="match-preview"></div>
-          <div class="match-preview"></div>
-          <div class="match-preview"></div>
-          <div class="match-preview"></div>
-          <div class="match-preview"></div>
-        </div>
-        <div id="timer">00:00</div>
+        </details>
+        <details>
+          <summary><span>Valid Sets</span></summary>
+          <div class="details-content">
+            <div class="inner">
+              <div id="valid-sets" class="matches">
+                <div class="match-preview example"></div>
+                <div class="match-preview example"></div>
+                <div class="match-preview example"></div>
+              </div>
+            </div>
+          </div>
+        </details>
+        <details>
+          <summary><span>Invalid Sets</span></summary>
+          <div class="details-content">
+            <div class="inner">
+              <div id="invalid-sets" class="matches">
+                <div class="match-preview example"></div>
+                <div class="match-preview example"></div>
+                <div class="match-preview example"></div>
+              </div>
+              <p>
+                The first set is invalid because two of the three cards have 3 shapes.
+                Either all three of them need to have three shapes, or only one of them can.
+              </p>
+              <p>
+                The second set is invalid because there are two striped cards and one solid.
+                Also, two of the cards are purple and one is red.
+              </p>
+              <p>
+                The third set is invalid because two cards have squiggles and one has ovals.
+              </p>
+            </div>
+          </div>
+        </details>
       </div>
-      <div id="toast-container"></div>
+      <div id="game-panel">
+        <div id="board"></div>
+      </div>
+      <div id="right-panel">
+        <div id="match-container">
+          <div id="match-header">0 sets found:</div>
+          <div class="matches">
+            <div class="match-preview"></div>
+            <div class="match-preview"></div>
+            <div class="match-preview"></div>
+            <div class="match-preview"></div>
+            <div class="match-preview"></div>
+            <div class="match-preview"></div>
+          </div>
+          <div id="timer">00:00</div>
+        </div>
+      </div>
     </div>
-    <div id="right-panel">
-      Test
-    </div>
+    <div id="toast-container"></div>
   </div>
 </body>
 

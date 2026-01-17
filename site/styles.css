@@ -51,7 +51,9 @@ p+p {
 }
 
 #content {
+  margin: auto;
   width: 100%;
+  max-width: 1250px;
   display: flex;
 }
 
@@ -62,7 +64,7 @@ p+p {
   }
 
   #info-panel {
-    order: 2;
+    order: 3;
   }
 
   #game-panel {
@@ -70,22 +72,22 @@ p+p {
   }
 
   #right-panel {
-    order: 3;
+    order: 2;
   }
 }
 
 #info-panel {
-  flex-grow: 1;
+  flex-grow: 0;
   flex-basis: 25%;
 }
 
 #game-panel {
-  flex-grow: 0;
+  flex-grow: 1;
   flex-basis: auto;
 }
 
 #right-panel {
-  flex-grow: 1;
+  flex-grow: 0;
   flex-basis: 25%;
 }
 
@@ -135,8 +137,7 @@ p+p {
   display: inline-block;
   margin-right: 0.5rem;
 
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'\
-       viewBox='0 0 16 16'><polygon points='4,2 12,8 4,14' fill='currentColor'/></svg>");
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><polygon points='4,2 12,8 4,14' fill='currentColor'/></svg>");
 
   background-size: contain;
   background-repeat: no-repeat;
@@ -164,12 +165,11 @@ p+p {
   display: flex;
   align-items: center;
   flex-direction: column;
+  align-items: stretch;
 }
 
 #board {
   margin: 10px;
-  width: min-content;
-  height: min-content;
   border: 2px solid;
   border-color: black;
   border-radius: 8px;
@@ -184,36 +184,24 @@ p+p {
 
 .card-wrapper {
   margin: 10px;
+  container: card;
+  container-type: inline-size;
 }
 
 .card-wrapper.preview {
-  width: calc(var(--card-width) * var(--small-scale));
-  height: calc(var(--card-height) * var(--small-scale));
   margin: 2.5px;
 }
 
 .card {
-  padding: calc(var(--card-width) * 0.05);
-  width: var(--card-width);
-  height: var(--card-height);
-  border: 3px solid;
+  aspect-ratio: 3.5 / 2.25;
+  border: 2cqmin solid;
   border-color: black;
-  border-radius: calc(var(--card-width) * 0.1);
+  border-radius: 8% / calc(8% * 3.5/2.25);
+  padding: 10% 0;
   display: flex;
   justify-content: center;
   align-items: center;
   background-color: white;
-}
-
-@media (max-width: 550px) {
-  .card {
-    border: 2px solid;
-  }
-}
-
-.card.preview {
-  scale: var(--small-scale);
-  transform-origin: top left;
 }
 
 .card:hover:not(.preview) {
@@ -257,8 +245,6 @@ svg.shape .stroke {
 #match-container {
   margin: 10px;
   padding: 10px;
-  width: min-content;
-  height: min-content;
   border: 2px solid;
   border-color: black;
   border-radius: 8px;
@@ -271,13 +257,18 @@ svg.shape .stroke {
 }
 
 .matches {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+@media (max-width: 768px) {
+  .matches {
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+  }
 }
 
 .match-preview {
-  /* width: 61.333px; */
-  /* height: 109px; */
-  margin: 10px;
+  margin: 10%;
   padding: 2.5px;
   border: 2px solid;
   border-color: black;
@@ -310,25 +301,37 @@ svg.shape .stroke {
 }
 
 #toast-container {
-  height: 118px;
+  position: fixed;
+  left: 0px;
+  top: 0px;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+  align-items: center;
+  pointer-events: none;
 }
 
 .toast {
-  padding: 10px;
   margin: 10px;
-  width: 160px;
-  height: 24px;
+  width: 12em;
+  height: 2em;
   border-radius: 8px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: center;
   color: white;
   box-shadow: 0px 0px 10px -2px black;
+  margin-top: calc(-2em - 10px);
 
   /* Transition settings */
   opacity: 0;
-  transform: translateY(12px);
-  transition: opacity 320ms cubic-bezier(.42, 0, .58, 1), transform 320ms cubic-bezier(.42, 0, .58, 1);
+  transform: translateY(calc(2em + 20px));
+  transition:
+    opacity 500ms ease-in-out,
+    transform 500ms ease-in-out,
+    margin-top 500ms ease-in-out;
 }
 
 .toast.success {
@@ -346,16 +349,12 @@ svg.shape .stroke {
 .toast.show {
   opacity: 1;
   transform: translateY(0);
+  margin-top: 10px;
 }
 
 .toast.hide {
   opacity: 0;
-  transform: translateY(12px);
-}
-
-.toast .message {
-  width: 100%;
-  text-align: center;
+  transform: translateY(-1em);
 }
 
 @keyframes blink-animation {
