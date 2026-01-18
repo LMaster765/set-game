@@ -3,6 +3,7 @@
   --red: #c00000;
   --green: #008000;
   --purple: #800080;
+  --shade: #DDD;
 
   /* 2.25 x 3.5 is standard card size... probably */
   /* pixel size is x40 these dimensions */
@@ -58,6 +59,11 @@ p+p {
 }
 
 @media (max-width: 768px) {
+
+  body {
+    margin: 10px;
+  }
+
   #content {
     display: flex;
     flex-direction: column;
@@ -97,8 +103,13 @@ p+p {
   text-align: center;
 }
 
+#info-panel {
+  display: grid;
+  height: min-content;
+}
+
 #info-panel details {
-  margin: 20px 10px;
+  margin: 10px;
   width: auto;
   height: min-content;
   border: 2px solid;
@@ -106,10 +117,7 @@ p+p {
   border-radius: 8px;
   padding: 10px;
   hyphens: auto;
-}
-
-#info-panel details:first-of-type {
-  margin: 10px;
+  background-color: var(--shade);
 }
 
 #info-panel summary {
@@ -176,6 +184,7 @@ p+p {
   display: grid;
   grid-template-columns: 33.3% 33.3% 33.3%;
   padding: 10px;
+  background-color: var(--shade);
 }
 
 .card-wrapper.ghost {
@@ -183,7 +192,7 @@ p+p {
 }
 
 .card-wrapper {
-  margin: 10%;
+  margin: 4%;
   container: card / inline-size;
 }
 
@@ -223,7 +232,7 @@ p+p {
 }
 
 .shape {
-  margin: 2.212px;
+  margin: 2%;
   height: 100%;
 }
 
@@ -238,11 +247,12 @@ svg.shape .stroke {
 }
 
 #match-container {
-  margin: 10px;
+  margin: 10px 10px;
   padding: 10px;
   border: 2px solid;
   border-color: black;
   border-radius: 8px;
+  background-color: var(--shade);
 }
 
 @media (max-width: 768px) {
@@ -276,6 +286,7 @@ svg.shape .stroke {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  background-color: white;
 }
 
 .match-preview:not(.example):not(:has(.ghost)):has(*) {
