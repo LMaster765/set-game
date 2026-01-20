@@ -202,15 +202,8 @@ TODO:
           matches.push([...selected]);
 
           const matchPreview = document.querySelectorAll(".match-preview:not(.example)")[idx];
-          console.log(matchPreview);
           matchPreview.innerHTML = "";
-          const frag = document.createDocumentFragment();
-
-          for (const card of selected) {
-            frag.append(makeCard(card, true));
-          }
-
-          matchPreview.appendChild(frag);
+          matchPreview.appendChild(makeMatch(selected));
 
           const matchHeader = document.getElementById("match-header");
           if (matches.length == 1) {
@@ -256,18 +249,13 @@ TODO:
       }, 5000);
     }
 
-    function makeCard(card, tiny = false) {
+    function makeCard(card, active = false) {
       const cardWrapper = document.createElement("div");
       cardWrapper.className = "card-wrapper";
 
       const cardEl = document.createElement("div");
       cardEl.className = `card ${card.color}`.trim();
       cardWrapper.appendChild(cardEl);
-
-      if (tiny) {
-        cardEl.classList.add("preview");
-        cardWrapper.classList.add("preview");
-      }
 
       const svg = document.createElementNS(
         'http://www.w3.org/2000/svg',
@@ -310,17 +298,35 @@ TODO:
       }
       cardEl.append(svg);
 
-      if (!tiny) {
+      if (active) {
         cardEl.addEventListener("click", e => onClick(card, e));
+        cardEl.classList.add("active");
       }
 
       return cardWrapper;
+    }
+
+    function makeMatch(cards, cardClasses = []) {
+      const frag = document.createDocumentFragment();
+      let idx = 0;
+      for (const card of cards) {
+        const cardEl = makeCard(card);
+        cardEl.setAttribute("style", `grid-column: 2; grid-row: ${2 + idx};`);
+        if (cardClasses.length > 0) {
+          cardEl.classList.add(cardClasses);
+        }
+        idx++;
+        frag.append(cardEl);
+      }
+
+      return frag;
     }
 
     let timerId = null;
     let startTime = null;
 
     document.addEventListener("DOMContentLoaded", () => {
+
       // set up details panes
       document.querySelectorAll("details").forEach(details => {
         const summary = details.querySelector("summary");
@@ -397,48 +403,40 @@ TODO:
       const examples = document.querySelectorAll(".match-preview.example");
       const cards = [
         [
-          [new Card(Color.PURPLE, 2, Shape.SQUIGGLE, Fill.STRIPED), false],
-          [new Card(Color.PURPLE, 2, Shape.DIAMOND, Fill.STRIPED), false],
-          [new Card(Color.PURPLE, 2, Shape.OVAL, Fill.STRIPED), false]
+          new Card(Color.PURPLE, 2, Shape.SQUIGGLE, Fill.STRIPED),
+          new Card(Color.PURPLE, 2, Shape.DIAMOND, Fill.STRIPED),
+          new Card(Color.PURPLE, 2, Shape.OVAL, Fill.STRIPED)
         ],
         [
-          [new Card(Color.RED, 1, Shape.OVAL, Fill.EMPTY), false],
-          [new Card(Color.PURPLE, 2, Shape.OVAL, Fill.SOLID), false],
-          [new Card(Color.GREEN, 3, Shape.OVAL, Fill.STRIPED), false]
+          new Card(Color.RED, 1, Shape.OVAL, Fill.EMPTY),
+          new Card(Color.PURPLE, 2, Shape.OVAL, Fill.SOLID),
+          new Card(Color.GREEN, 3, Shape.OVAL, Fill.STRIPED)
         ],
         [
-          [new Card(Color.GREEN, 3, Shape.DIAMOND, Fill.SOLID), false],
-          [new Card(Color.RED, 1, Shape.OVAL, Fill.STRIPED), false],
-          [new Card(Color.PURPLE, 2, Shape.SQUIGGLE, Fill.EMPTY), false]
+          new Card(Color.GREEN, 3, Shape.DIAMOND, Fill.SOLID),
+          new Card(Color.RED, 1, Shape.OVAL, Fill.STRIPED),
+          new Card(Color.PURPLE, 2, Shape.SQUIGGLE, Fill.EMPTY)
         ],
         [
-          [new Card(Color.RED, 1, Shape.DIAMOND, Fill.EMPTY), false],
-          [new Card(Color.RED, 3, Shape.DIAMOND, Fill.SOLID), true],
-          [new Card(Color.RED, 3, Shape.DIAMOND, Fill.STRIPED), true]
+          new Card(Color.RED, 1, Shape.DIAMOND, Fill.EMPTY),
+          new Card(Color.RED, 3, Shape.DIAMOND, Fill.SOLID),
+          new Card(Color.RED, 3, Shape.DIAMOND, Fill.STRIPED)
         ],
         [
-          [new Card(Color.RED, 2, Shape.SQUIGGLE, Fill.STRIPED), true],
-          [new Card(Color.PURPLE, 2, Shape.DIAMOND, Fill.STRIPED), true],
-          [new Card(Color.PURPLE, 2, Shape.OVAL, Fill.SOLID), false]
+          new Card(Color.RED, 2, Shape.SQUIGGLE, Fill.STRIPED),
+          new Card(Color.PURPLE, 2, Shape.DIAMOND, Fill.STRIPED),
+          new Card(Color.PURPLE, 2, Shape.OVAL, Fill.SOLID)
         ],
         [
-          [new Card(Color.GREEN, 3, Shape.SQUIGGLE, Fill.SOLID), true],
-          [new Card(Color.RED, 1, Shape.OVAL, Fill.STRIPED), false],
-          [new Card(Color.PURPLE, 2, Shape.SQUIGGLE, Fill.EMPTY), true]
+          new Card(Color.GREEN, 3, Shape.SQUIGGLE, Fill.SOLID),
+          new Card(Color.RED, 1, Shape.OVAL, Fill.STRIPED),
+          new Card(Color.PURPLE, 2, Shape.SQUIGGLE, Fill.EMPTY)
         ]
       ];
 
       for (let i = 0; i < cards.length && i < examples.length; i++) {
-        const frag = document.createDocumentFragment();
-        for (const card of cards[i]) {
-          let cardEl = makeCard(card[0], true)
-          if (card[1]) {
-            cardEl.classList.add("selected");
-          }
-          frag.append(cardEl);
-        }
         examples[i].innerHTML = "";
-        examples[i].appendChild(frag);
+        examples[i].appendChild(makeMatch(cards[i]));
       }
 
       // set up ghost cards
@@ -446,23 +444,18 @@ TODO:
       const fakeCard = new Card(null, 3, Shape.OVAL, Fill.SOLID);
       for (const preview of matchPreviews) {
         preview.innerHTML = "";
-        const frag = document.createDocumentFragment();
-
-        for (let i = 0; i < 3; i++) {
-          const cardEl = makeCard(fakeCard, true);
-          cardEl.classList.add("ghost");
-          frag.append(cardEl);
-        }
-
-        preview.appendChild(frag);
+        preview.appendChild(makeMatch([fakeCard, fakeCard, fakeCard], ["ghost"]));
       }
 
       // show cards
       const container = document.getElementById("board");
       const frag = document.createDocumentFragment();
 
+      let idx = 0;
       for (const card of b.deck) {
-        let cardEl = makeCard(card);
+        let cardEl = makeCard(card, true);
+        cardEl.setAttribute("style", `grid-column: ${2 + (idx % 3)}; grid-row: ${2 + Math.floor(idx / 3)};`);
+        idx++;
         frag.append(cardEl);
       }
 
@@ -553,9 +546,15 @@ TODO:
           <div class="details-content">
             <div class="inner">
               <div id="valid-sets" class="matches">
-                <div class="match-preview example"></div>
-                <div class="match-preview example"></div>
-                <div class="match-preview example"></div>
+                <div class="match-wrapper">
+                  <div class="match-preview example"></div>
+                </div>
+                <div class="match-wrapper">
+                  <div class="match-preview example"></div>
+                </div>
+                <div class="match-wrapper">
+                  <div class="match-preview example"></div>
+                </div>
               </div>
             </div>
           </div>
@@ -565,9 +564,15 @@ TODO:
           <div class="details-content">
             <div class="inner">
               <div id="invalid-sets" class="matches">
-                <div class="match-preview example"></div>
-                <div class="match-preview example"></div>
-                <div class="match-preview example"></div>
+                <div class="match-wrapper">
+                  <div class="match-preview example"></div>
+                </div>
+                <div class="match-wrapper">
+                  <div class="match-preview example"></div>
+                </div>
+                <div class="match-wrapper">
+                  <div class="match-preview example"></div>
+                </div>
               </div>
               <p>
                 The first set is invalid because two of the three cards have 3 shapes.
@@ -591,12 +596,24 @@ TODO:
         <div id="match-container">
           <div id="match-header">0 sets found:</div>
           <div class="matches">
-            <div class="match-preview"></div>
-            <div class="match-preview"></div>
-            <div class="match-preview"></div>
-            <div class="match-preview"></div>
-            <div class="match-preview"></div>
-            <div class="match-preview"></div>
+            <div class="match-wrapper">
+              <div class="match-preview"></div>
+            </div>
+            <div class="match-wrapper">
+              <div class="match-preview"></div>
+            </div>
+            <div class="match-wrapper">
+              <div class="match-preview"></div>
+            </div>
+            <div class="match-wrapper">
+              <div class="match-preview"></div>
+            </div>
+            <div class="match-wrapper">
+              <div class="match-preview"></div>
+            </div>
+            <div class="match-wrapper">
+              <div class="match-preview"></div>
+            </div>
           </div>
           <div id="timer">00:00</div>
         </div>
