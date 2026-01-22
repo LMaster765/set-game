@@ -210,7 +210,7 @@ function checkMatch() {
         timerEl.textContent = new Date(time).toISOString().slice(14, -1);
         const shareEl = document.getElementById("share-container");
         const linkEl = shareEl.querySelector("a");
-        linkEl.setAttribute("href", encodeURIComponent(`I just solved the Daily SET in ${timerEl.textContent}! Give it a try!\nhttps://levilarsen.me/set-game/set.html`))
+        linkEl.setAttribute("href", `sms:?&body=${encodeURIComponent(`I just solved the Daily SET in ${timerEl.textContent}! Give it a try!\nhttps://levilarsen.me/set-game/set.html`)}`);
         shareEl.classList.remove("hidden");
       }
 
