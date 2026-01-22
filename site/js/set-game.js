@@ -1,6 +1,6 @@
 /*
-     * RNG Code courtesy of ChatGPT
-     */
+ * RNG Code courtesy of ChatGPT
+ */
 
 // Create a seed from today’s date
 function getTodaySeed() {
@@ -105,12 +105,12 @@ class Card {
 
 class Board {
   deck = [];
-  constructor(matches = 6) {
+  constructor(seed = hashStringToInt(getTodaySeed()), matches = 6) {
     console.debug(`Building board with ${matches} matches...`)
     const start = performance.now()
-    const seedString = getTodaySeed();
-    const seedNumber = hashStringToInt(seedString);
-    const random = mulberry32(seedNumber);
+    seed |= 0 // force seed to be 32-bit integer
+    console.debug(`Random Seed: ${seed}`);
+    const random = mulberry32(seed);
     // change inital random number generation value
     // for (let i = 0; i++ < 6; random());
 
@@ -148,7 +148,10 @@ class Board {
   }
 }
 
-let b = new Board();
+const urlParams = new URLSearchParams(window.location.search);
+const seed = urlParams.get("id");
+
+let b = seed ? new Board(seed) : new Board();
 
 let selected = [];
 let selectedCards = [];
@@ -205,6 +208,10 @@ function checkMatch() {
         timerEl.classList.add("blink");
         let time = Date.now() - startTime;
         timerEl.textContent = new Date(time).toISOString().slice(14, -1);
+        const shareEl = document.getElementById("share-container");
+        const linkEl = shareEl.querySelector("a");
+        linkEl.setAttribute("href", encodeURIComponent(`I just solved the Daily SET in ${timerEl.textContent}! Give it a try!\nhttps://levilarsen.me/set-game/set.html`))
+        shareEl.classList.remove("hidden");
       }
 
     } else {

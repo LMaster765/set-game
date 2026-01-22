@@ -108,16 +108,18 @@ p+p {
   height: min-content;
 }
 
-#info-panel details {
+.container {
   margin: 10px;
-  width: auto;
-  height: min-content;
   border: 2px solid;
   border-color: black;
   border-radius: 8px;
   padding: 10px;
-  hyphens: auto;
   background-color: var(--shade);
+}
+
+#info-panel details {
+  height: min-content;
+  hyphens: auto;
 }
 
 #info-panel summary {
@@ -310,6 +312,15 @@ svg.shape .stroke {
   font-size: x-large;
   width: 100%;
   text-align: center;
+}
+
+#share-container {
+  opacity: 1;
+  transition: opacity 500ms ease;
+}
+
+#share-container.hidden {
+  opacity: 0;
 }
 
 #toast-container {
