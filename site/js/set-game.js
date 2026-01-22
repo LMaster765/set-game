@@ -211,7 +211,10 @@ function checkMatch() {
         const shareEl = document.getElementById("share-container");
         const linkEl = shareEl.querySelector("a");
         linkEl.setAttribute("href", `sms:?&body=${encodeURIComponent(`I just solved the Daily SET in ${timerEl.textContent}! Give it a try!\nhttps://levilarsen.me/set-game/set.html`)}`);
-        shareEl.classList.remove("hidden");
+        shareEl.removeAttribute("hidden");
+        requestAnimationFrame(() => {
+          shareEl.classList.remove("hidden");
+        });
       }
 
     } else {
@@ -455,22 +458,31 @@ document.addEventListener("DOMContentLoaded", () => {
   container.innerHTML = "";
   container.appendChild(frag);
 
-  // timer V1: 100ms interval
+  // timer V1: 1000ms interval
   const timerEl = document.getElementById("timer");
   startTime = Date.now();
   timerId = setInterval(() => {
     let time = Date.now() - startTime;
     timerEl.textContent = new Date(time).toISOString().slice(14, -5);
   }, 1000);
-
-  // timer V2: requestAnimationFrame()
-  /*
-  const timerEl = document.getElementById("timer");
-  function updateTimer(now) {
-    const time = now - startTime;
-    timerEl.textContent = new Date(time).toISOString().slice(14, -5);
-    requestAnimationFrame(updateTimer);
-  }
-  requestAnimationFrame(updateTimer);
-  */
 });
+
+async function shareResults() {
+  if (navigator.share) {
+
+    const data = {
+      title: "Daily SET",
+      url: "https://levilarsen.me/set-game/set.html",
+      text: "Try the Daily SET!"
+    }
+
+    try {
+      await navigator.share(data);
+      console.log("Shared successfully!");
+    } catch (e) {
+      console.error(`Share error: ${e}`);
+    }
+  } else {
+    console.error("navigator.share() not supported!");
+  }
+}

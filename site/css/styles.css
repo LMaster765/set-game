@@ -3,7 +3,9 @@
   --red: #c00000;
   --green: #008000;
   --purple: #800080;
+  --light-shade: #EEE;
   --shade: #DDD;
+  --dark-shade: #CCC;
 
   /* 2.25 x 3.5 is standard card size... probably */
   /* pixel size is x40 these dimensions */
@@ -103,7 +105,7 @@ p+p {
   text-align: center;
 }
 
-#info-panel {
+.sidebar {
   display: grid;
   height: min-content;
 }
@@ -172,7 +174,7 @@ p+p {
 }
 
 #game-panel {
-  container: board / inline-size;
+  container: game-panel / inline-size;
 }
 
 #board {
@@ -256,15 +258,6 @@ svg.shape .stroke {
   stroke-width: 18px;
 }
 
-#match-container {
-  margin: 10px 10px;
-  padding: 10px;
-  border: 2px solid;
-  border-color: black;
-  border-radius: 8px;
-  background-color: var(--shade);
-}
-
 @media (max-width: 768px) {
   #match-container {
     padding: 5px;
@@ -280,7 +273,6 @@ svg.shape .stroke {
 .matches {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  container: match-preview / inline-size;
 }
 
 @media (max-width: 768px) {
@@ -290,7 +282,7 @@ svg.shape .stroke {
 }
 
 .match-wrapper {
-  container: match-preview / inline-size;
+  container: match-wrapper / inline-size;
 }
 
 .match-preview {
@@ -309,6 +301,7 @@ svg.shape .stroke {
 }
 
 #timer {
+  margin-top: 10px;
   font-size: x-large;
   width: 100%;
   text-align: center;
@@ -321,6 +314,23 @@ svg.shape .stroke {
 
 #share-container.hidden {
   opacity: 0;
+}
+
+button {
+  padding: 5px;
+  font-family: inherit;
+  font-weight: inherit;
+  border-radius: 5px;
+  width: 100%;
+  background-color: var(--light-shade);
+}
+
+button:hover {
+  background-color: var(--dark-shade);
+}
+
+button:active {
+  background-color: var(--light-shade);
 }
 
 #toast-container {

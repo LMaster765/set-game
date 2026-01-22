@@ -41,7 +41,7 @@ TODO:
   <div id="main-container">
     <div id="title">Daily SET</div>
     <div id="content">
-      <div id="info-panel">
+      <div id="info-panel" class="sidebar">
         <details class="container">
           <summary><span>About</span></summary>
           <div class="details-content">
@@ -122,7 +122,7 @@ TODO:
       <div id="game-panel">
         <div id="board"></div>
       </div>
-      <div id="right-panel">
+      <div id="right-panel" class="sidebar">
         <div id="match-container" class="container">
           <div id="match-header">0 sets found:</div>
           <div class="matches">
@@ -148,11 +148,11 @@ TODO:
           <div id="timer">00:00</div>
         </div>
         <div id="share-container" class="container">
-          <a href="sms:?&body=Check%20out%20Daily%20SET!">Share your results!</a>
+          <button onclick="shareResults()">Share your results!</button>
+        </div>
       </div>
+      <div id="toast-container"></div>
     </div>
-    <div id="toast-container"></div>
-  </div>
 </body>
 
 </html>
