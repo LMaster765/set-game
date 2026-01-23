@@ -322,15 +322,15 @@ button {
   font-weight: inherit;
   border-radius: 5px;
   width: 100%;
-  background-color: var(--light-shade);
+  background-color: white;
 }
 
 button:hover {
-  background-color: var(--dark-shade);
+  background-color: var(--light-shade);
 }
 
 button:active {
-  background-color: var(--light-shade);
+  background-color: white;
 }
 
 #toast-container {

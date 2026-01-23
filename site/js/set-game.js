@@ -208,13 +208,9 @@ function checkMatch() {
         timerEl.classList.add("blink");
         let time = Date.now() - startTime;
         timerEl.textContent = new Date(time).toISOString().slice(14, -1);
+        shareData.text = formatTime(time);
         const shareEl = document.getElementById("share-container");
-        const linkEl = shareEl.querySelector("a");
-        linkEl.setAttribute("href", `sms:?&body=${encodeURIComponent(`I just solved the Daily SET in ${timerEl.textContent}! Give it a try!\nhttps://levilarsen.me/set-game/set.html`)}`);
-        shareEl.removeAttribute("hidden");
-        requestAnimationFrame(() => {
-          shareEl.classList.remove("hidden");
-        });
+        shareEl.classList.remove("hidden");
       }
 
     } else {
@@ -467,22 +463,45 @@ document.addEventListener("DOMContentLoaded", () => {
   }, 1000);
 });
 
+const shareData = {
+  title: "Daily SET",
+  url: "https://levilarsen.me/set-game/set.html",
+  text: "Try the Daily SET!"
+}
+
 async function shareResults() {
+  const fallback = `sms:?&body=${encodeURIComponent(shareData.url + "\n" + shareData.text)}`;
   if (navigator.share) {
-
-    const data = {
-      title: "Daily SET",
-      url: "https://levilarsen.me/set-game/set.html",
-      text: "Try the Daily SET!"
-    }
-
     try {
-      await navigator.share(data);
-      console.log("Shared successfully!");
+      await navigator.share(shareData);
     } catch (e) {
       console.error(`Share error: ${e}`);
+      window.open(fallback);
     }
   } else {
     console.error("navigator.share() not supported!");
+    window.open(fallback);
   }
+}
+
+function formatTime(time) {
+  const minutes = Math.floor(time / (1000 * 60));
+  const seconds = ((time / 1000) % 60).toFixed(3);
+  let str = "I just solved today's Daily SET in ";
+
+  if (minutes > 1) {
+    str += `${minutes} minutes and `;
+  } else if (minutes == 1) {
+    str += `${minutes} minute and `;
+  }
+
+  if (seconds != 1) {
+    str += `${seconds} seconds`;
+  } else {
+    str += `${seconds} second`;
+  }
+
+  str += "! Think you can do better?";
+
+  return str;
 }
