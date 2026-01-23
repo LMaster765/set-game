@@ -210,7 +210,10 @@ function checkMatch() {
         timerEl.textContent = new Date(time).toISOString().slice(14, -1);
         shareData.text = formatTime(time);
         const shareEl = document.getElementById("share-container");
-        shareEl.classList.remove("hidden");
+        shareEl.removeAttribute("hidden");
+        requestAnimationFrame(() => {
+          shareEl.classList.remove("hidden");
+        });
       }
 
     } else {
